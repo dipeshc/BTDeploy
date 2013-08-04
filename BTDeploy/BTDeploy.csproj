@@ -67,7 +67,6 @@
     <Compile Include="Helpers\Wildcard.cs" />
     <Compile Include="Client.Commands\Add.cs" />
     <Compile Include="Client.Commands\ClientCommandBase.cs" />
-    <Compile Include="Client.Commands\Kill.cs" />
     <Compile Include="Client.Commands\List.cs" />
     <Compile Include="Client.Commands\Remove.cs" />
     <Compile Include="ServiceDaemon\AdminService.cs" />
