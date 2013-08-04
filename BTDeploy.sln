@@ -3,16 +3,41 @@ Microsoft Visual Studio Solution File, Format Version 11.00
 # Visual Studio 2010
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BTDeploy", "BTDeploy\BTDeploy.csproj", "{77E12323-A195-4A1E-858B-295DA3B83840}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "libs", "libs", "{B2BE41B3-62C2-4506-B7F9-6F9B1F32B4C1}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MonoTorrent", "libs\monotorrent\src\MonoTorrent\MonoTorrent.csproj", "{411A9E0E-FDC6-4E25-828A-0C2CD1CD96F8}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MonoTorrent.Dht", "libs\monotorrent\src\MonoTorrent.Dht\MonoTorrent.Dht.csproj", "{7A2A7E73-FD43-4171-AA34-DA413D35459E}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x86 = Debug|x86
 		Release|x86 = Release|x86
+		Stats|Any CPU = Stats|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{411A9E0E-FDC6-4E25-828A-0C2CD1CD96F8}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{411A9E0E-FDC6-4E25-828A-0C2CD1CD96F8}.Debug|x86.Build.0 = Debug|Any CPU
+		{411A9E0E-FDC6-4E25-828A-0C2CD1CD96F8}.Release|x86.ActiveCfg = Release|Any CPU
+		{411A9E0E-FDC6-4E25-828A-0C2CD1CD96F8}.Release|x86.Build.0 = Release|Any CPU
+		{411A9E0E-FDC6-4E25-828A-0C2CD1CD96F8}.Stats|Any CPU.ActiveCfg = Stats|Any CPU
+		{411A9E0E-FDC6-4E25-828A-0C2CD1CD96F8}.Stats|Any CPU.Build.0 = Stats|Any CPU
 		{77E12323-A195-4A1E-858B-295DA3B83840}.Debug|x86.ActiveCfg = Debug|x86
 		{77E12323-A195-4A1E-858B-295DA3B83840}.Debug|x86.Build.0 = Debug|x86
 		{77E12323-A195-4A1E-858B-295DA3B83840}.Release|x86.ActiveCfg = Release|x86
 		{77E12323-A195-4A1E-858B-295DA3B83840}.Release|x86.Build.0 = Release|x86
+		{77E12323-A195-4A1E-858B-295DA3B83840}.Stats|Any CPU.ActiveCfg = Debug|x86
+		{77E12323-A195-4A1E-858B-295DA3B83840}.Stats|Any CPU.Build.0 = Debug|x86
+		{7A2A7E73-FD43-4171-AA34-DA413D35459E}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{7A2A7E73-FD43-4171-AA34-DA413D35459E}.Debug|x86.Build.0 = Debug|Any CPU
+		{7A2A7E73-FD43-4171-AA34-DA413D35459E}.Release|x86.ActiveCfg = Release|Any CPU
+		{7A2A7E73-FD43-4171-AA34-DA413D35459E}.Release|x86.Build.0 = Release|Any CPU
+		{7A2A7E73-FD43-4171-AA34-DA413D35459E}.Stats|Any CPU.ActiveCfg = Debug|Any CPU
+		{7A2A7E73-FD43-4171-AA34-DA413D35459E}.Stats|Any CPU.Build.0 = Debug|Any CPU
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{411A9E0E-FDC6-4E25-828A-0C2CD1CD96F8} = {B2BE41B3-62C2-4506-B7F9-6F9B1F32B4C1}
+		{7A2A7E73-FD43-4171-AA34-DA413D35459E} = {B2BE41B3-62C2-4506-B7F9-6F9B1F32B4C1}
 	EndGlobalSection
 	GlobalSection(MonoDevelopProperties) = preSolution
 		StartupItem = BTDeploy\BTDeploy.csproj
