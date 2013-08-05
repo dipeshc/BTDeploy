@@ -10,7 +10,7 @@ namespace BTDeploy.Client.Commands
 	{
 		public bool Delete = false;
 
-		public Remove (IRestClient client) : base(client, "Removes one or more deployments with matching id/name/pattern (wildcards supported).")
+		public Remove (IRestClient client) : base(client, "Removes specified deployments. Specify deployments by providing torrent id or wildcard name pattern.")
 		{
 			HasOption ("d|delete", "Deletes the files along with the torrent deployment file.", o => Delete = o != null);
 			HasAdditionalArguments (null);
@@ -18,21 +18,14 @@ namespace BTDeploy.Client.Commands
 
 		public override int Run (string[] remainingArguments)
 		{
-			// Set ids and patterns.
-			var ids = remainingArguments;
-			var patterns = remainingArguments.Select (p => new Wildcard (p, RegexOptions.IgnoreCase | RegexOptions.Compiled)).ToList();
-
 			// Get all the torrents.
 			var allTorrentDetails = Client.Get (new TorrentsListRequest ());
 
-			// Do matching.
-			var torrentDetailsIdMatches = allTorrentDetails.Where (torrentDetails => ids.Contains (torrentDetails.Id));
-			var torrentDetailsPatternMatches = allTorrentDetails.Where (torrentDetails => patterns.Any(p => p.Match(torrentDetails.Name).Success)).ToList();
-			var torrentDetailsMatches = Enumerable.Union (torrentDetailsIdMatches, torrentDetailsPatternMatches).ToList();
-
+			// Filter.
+			var torrentDetailsMatches = FilterByIdOrPattern (remainingArguments, allTorrentDetails);
 
 			// Remove each match found.
-			torrentDetailsMatches.ForEach (torrentDetails =>
+			torrentDetailsMatches.ToList().ForEach (torrentDetails =>
 			{
 				Client.Delete(new TorrentRemoveRequest
               	{

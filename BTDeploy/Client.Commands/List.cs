@@ -13,14 +13,24 @@ namespace BTDeploy.Client.Commands
 	{
 		public bool IncludeId = false;
 
-		public List (IRestClient client) : base(client, "List the current deployments.")
+		public List (IRestClient client) : base(client, "Lists the current deployments. Filter deployments by providing torrent id or wildcard name pattern.")
 		{
 			HasOption ("id", "Include torrent id in output table.", o => IncludeId = o != null);
+			HasAdditionalArguments (null);
 		}
 
 		public override int Run (string[] remainingArguments)
 		{
+			// Get all the torrents.
 			var allTorrentDetails = Client.Get (new TorrentsListRequest ());
+
+			// If nothing specified we want it all.
+			if (!remainingArguments.Any ())
+				remainingArguments = new [] { "*" };
+
+			// Filter.
+			var torrentDetailsMatches = FilterByIdOrPattern (remainingArguments, allTorrentDetails);
+
 
 			var headers = new List<string>
 			{
@@ -37,7 +47,7 @@ namespace BTDeploy.Client.Commands
 
 			var table = new ConsoleTable (headers.ToArray());
 
-			allTorrentDetails.ToList ().ForEach (torrentDetails =>
+			torrentDetailsMatches.ToList ().ForEach (torrentDetails =>
 			{
 				var sizeInMegaBytes = Math.Round(torrentDetails.Size / Math.Pow(2, 20), 2);
 				var progress = Math.Round(torrentDetails.Progress, 2);
