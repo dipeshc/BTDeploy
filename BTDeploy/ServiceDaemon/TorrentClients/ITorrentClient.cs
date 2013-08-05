@@ -5,7 +5,7 @@ namespace BTDeploy.ServiceDaemon.TorrentClients
 	public interface ITorrentClient
 	{
 		ITorrentDetails[] List();
-		string Add(string torrentPath, string outputDirectoryPath);
+		string Add(string torrentFilePath, string outputDirectoryPath);
 		void Remove(string Id, bool deleteFiles = false);
 	}
 

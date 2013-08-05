@@ -57,6 +57,7 @@
       <HintPath>..\packages\ServiceStack.Text.3.9.56\lib\net35\ServiceStack.Text.dll</HintPath>
     </Reference>
     <Reference Include="System.Core" />
+    <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Program.cs" />
@@ -76,6 +77,7 @@
     <Compile Include="ServiceDaemon\TorrentClients\ITorrentClient.cs" />
     <Compile Include="ServiceDaemon\TorrentClients\MonoTorrentClient.cs" />
     <Compile Include="ServiceDaemon\TorrentClients\TorrentDetails.cs" />
+    <Compile Include="Helpers\FileList.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>

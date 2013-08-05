@@ -45,7 +45,7 @@ namespace BTDeploy.ServiceDaemon
 		{
 			// Get the uploaded torrent file and save it temporarily.
 			var uploadedTorrentFile = base.RequestContext.Files.First ();
-			var tempTorrentFilePath = Path.Combine (Path.GetTempPath (), uploadedTorrentFile.FileName);
+			var tempTorrentFilePath = Path.Combine (Path.GetTempPath (), Path.GetTempFileName());
 			uploadedTorrentFile.SaveTo (tempTorrentFilePath);
 
 			// Add the torrent and ge the torrent details.

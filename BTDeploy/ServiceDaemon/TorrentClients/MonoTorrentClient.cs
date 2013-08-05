@@ -10,6 +10,7 @@ using MonoTorrent.Dht.Listeners;
 using MonoTorrent.Dht;
 using MonoTorrent.Common;
 using System.Collections.Generic;
+using BTDeploy.Helpers;
 
 namespace BTDeploy.ServiceDaemon.TorrentClients
 {
@@ -19,20 +20,36 @@ namespace BTDeploy.ServiceDaemon.TorrentClients
 		public int DefaultTorrentUploadSlots = 4;
 		public int DefaultTorrentOpenConnections = 150;
 
+		protected readonly string TorrentFileDirectory;
 		protected readonly string DHTNodeFile;
 		protected readonly string FastResumeFile;
+		protected readonly string TorrentMappingsCacheFile;
 		protected ClientEngine Engine;
 		protected TorrentSettings DefaultTorrentSettings;
 		protected BEncodedDictionary FastResume;
+		protected ListFile<TorrentMapping> TorrentMappingsCache;
 
 		public MonoTorrentClient(string applicationDataDirectoryPath)
 		{
-			var monoTorrentClientApplicationDataDirectoryPath = Path.Combine (applicationDataDirectoryPath);
+			// Make directories.
+			var monoTorrentClientApplicationDataDirectoryPath = Path.Combine (applicationDataDirectoryPath, this.GetType().Name);
 			if (!Directory.Exists (monoTorrentClientApplicationDataDirectoryPath))
 				Directory.CreateDirectory (monoTorrentClientApplicationDataDirectoryPath);
 
+			TorrentFileDirectory = Path.Combine (monoTorrentClientApplicationDataDirectoryPath, "torrents");
+			if (!Directory.Exists (TorrentFileDirectory))
+				Directory.CreateDirectory (TorrentFileDirectory);
+
+			// Make files.
 			DHTNodeFile = Path.Combine (monoTorrentClientApplicationDataDirectoryPath, "dhtNodes");
 			FastResumeFile = Path.Combine (monoTorrentClientApplicationDataDirectoryPath, "fastResume");
+			TorrentMappingsCacheFile = Path.Combine (monoTorrentClientApplicationDataDirectoryPath, "torrentMappingsCache");
+
+			// Make mappings cache.
+			TorrentMappingsCache = new ListFile<TorrentMapping> (TorrentMappingsCacheFile);
+
+			// Make default torrent settings.
+			DefaultTorrentSettings = new TorrentSettings (DefaultTorrentUploadSlots, DefaultTorrentOpenConnections, 0, 0);
 		}
 
 		public void Start()
@@ -44,9 +61,6 @@ namespace BTDeploy.ServiceDaemon.TorrentClients
 				AllowedEncryption = EncryptionTypes.All
 			});
 			Engine.ChangeListenEndpoint (new IPEndPoint (IPAddress.Any, Port));
-
-			// Make default torrent settings.
-			DefaultTorrentSettings = new TorrentSettings (DefaultTorrentUploadSlots, DefaultTorrentOpenConnections, 0, 0);
 
 			// Setup DHT listener.
 			byte[] nodes = null;
@@ -71,6 +85,29 @@ namespace BTDeploy.ServiceDaemon.TorrentClients
 			{
 				FastResume = new BEncodedDictionary();
 			}
+
+			// Try load the cache file.
+			try
+			{
+				TorrentMappingsCache.Load();
+			}
+			catch
+			{
+			}
+
+			// Cross reference torrent files against cache entries (sync).
+			var torrents = Directory.GetFiles (TorrentFileDirectory, "*.torrent").Select (Torrent.Load).ToList();
+			TorrentMappingsCache.RemoveAll (tmc => !torrents.Any (t => t.InfoHash.ToString () == tmc.InfoHash));
+			TorrentMappingsCache.Save ();
+			torrents.Where (t => !TorrentMappingsCache.Any (tmc => tmc.InfoHash == t.InfoHash.ToString ()))
+					.ToList ().ForEach (t => File.Delete(t.TorrentPath));
+
+			// Reload the torrents and add them.
+			Directory.GetFiles (TorrentFileDirectory, "*.torrent").Select (Torrent.Load).ToList ().ForEach (torrent =>
+			{
+				var outputDirectoryPath = TorrentMappingsCache.First(tmc => tmc.InfoHash == torrent.InfoHash.ToString()).OutputDirectoryPath;
+				Add(torrent, outputDirectoryPath);
+			});
 		}
 
 		public ITorrentDetails[] List ()
@@ -78,14 +115,25 @@ namespace BTDeploy.ServiceDaemon.TorrentClients
 			return Engine.Torrents.Select (Convert).ToArray();
 		}
 
-		public string Add (string torrentPath, string outputDirectoryPath)
+		public string Add (string torrentFilePath, string outputDirectoryPath)
 		{
 			// Create output directory.
 			if (!Directory.Exists (outputDirectoryPath))
 				Directory.CreateDirectory (outputDirectoryPath);
 
-			// Make torrent and manager.
-			var torrent = Torrent.Load(torrentPath);
+			// Make torrent and save it.
+			var torrent = Torrent.Load (torrentFilePath);
+			var applicationDataTorrentFilePath = Path.Combine (TorrentFileDirectory, torrent.Name + ".torrent");
+			File.Copy (torrentFilePath, applicationDataTorrentFilePath, true);
+			torrent = Torrent.Load (applicationDataTorrentFilePath);
+
+			// Finally add.
+			return Add (torrent, outputDirectoryPath);
+		}
+
+		protected string Add(Torrent torrent, string outputDirectoryPath)
+		{
+			// Create the torrent manager.
 			var torrentManager = new TorrentManager(torrent, outputDirectoryPath, DefaultTorrentSettings);
 
 			// Check if already added.
@@ -101,18 +149,37 @@ namespace BTDeploy.ServiceDaemon.TorrentClients
 			Engine.Register(torrentManager);
 			torrentManager.Start ();
 
-			// Return id.
+			// Add to mappings cache.
+			TorrentMappingsCache.RemoveAll (tmc => tmc.InfoHash == torrent.InfoHash.ToString ());
+			TorrentMappingsCache.Add(new TorrentMapping
+			{
+				InfoHash = torrent.InfoHash.ToString(),
+				OutputDirectoryPath = outputDirectoryPath
+			});
+			TorrentMappingsCache.Save ();
+
+			// Return Id.
 			return torrentManager.InfoHash.ToString();
 		}
 
 		public void Remove (string Id, bool deleteFiles = false)
 		{
+			// Get the torrent manager.
 			var torrentManager = Engine.Torrents.First(tm => tm.InfoHash.ToString() == Id);
 
+			// Delete the torrent file.
+			File.Delete (torrentManager.Torrent.TorrentPath);
+
+			// Delete the cache reference.
+			TorrentMappingsCache.RemoveAll (tmc => tmc.InfoHash == torrentManager.Torrent.InfoHash.ToString ());
+			TorrentMappingsCache.Save ();
+
+			// Stop and remove the torrent from the engine.
 			torrentManager.Stop();
 			Engine.Unregister(torrentManager);
 			torrentManager.Dispose();
 
+			// Delete files if required.
 			if(deleteFiles)
 				Directory.Delete(torrentManager.SavePath, true);
 		}
@@ -153,6 +220,14 @@ namespace BTDeploy.ServiceDaemon.TorrentClients
 					break;
 			}
 			return torrentDetails;
+		}
+
+		public class TorrentMapping
+		{
+			public string InfoHash { get; set; }
+			public string OutputDirectoryPath { get; set; }
+
+			public TorrentMapping() {}
 		}
 	}
 }
