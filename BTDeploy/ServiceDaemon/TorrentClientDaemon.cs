@@ -10,24 +10,24 @@ namespace BTDeploy.ServiceDaemon
 {
 	public class TorrentClientDaemon
 	{
-		protected string SessionDirectoryPath;
+		protected string ApplicationDataDirectoryPath;
 
-		public TorrentClientDaemon (string sessionDirectoryPath)
+		public TorrentClientDaemon (string applicationDataDirectoryPath)
 		{
-			SessionDirectoryPath = sessionDirectoryPath;
+			ApplicationDataDirectoryPath = applicationDataDirectoryPath;
 		}
 
 		public void Start()
 		{
 			// Make clients.
-			var monotTorrentClient = new MonoTorrentClient (SessionDirectoryPath);
+			var monotTorrentClient = new MonoTorrentClient (ApplicationDataDirectoryPath);
 			monotTorrentClient.Start ();
 
 			// Get avaible tcp port.
 			var port = SocketHelpers.GetAvailableTCPPort ();
 
 			// Write port to file.
-			var portFilePath = Path.Combine (SessionDirectoryPath, "port");
+			var portFilePath = Path.Combine (ApplicationDataDirectoryPath, "port");
 			File.WriteAllText (portFilePath, port.ToString ());
 
 			// Make service.

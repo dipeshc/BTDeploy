@@ -25,14 +25,14 @@ namespace BTDeploy.ServiceDaemon.TorrentClients
 		protected TorrentSettings DefaultTorrentSettings;
 		protected BEncodedDictionary FastResume;
 
-		public MonoTorrentClient(string ApplicationWorkingDirectoryPath)
+		public MonoTorrentClient(string applicationDataDirectoryPath)
 		{
-			var monoTorrentClientWorkingDirectoryPath = Path.Combine (ApplicationWorkingDirectoryPath);
-			if (!Directory.Exists (monoTorrentClientWorkingDirectoryPath))
-				Directory.CreateDirectory (monoTorrentClientWorkingDirectoryPath);
+			var monoTorrentClientApplicationDataDirectoryPath = Path.Combine (applicationDataDirectoryPath);
+			if (!Directory.Exists (monoTorrentClientApplicationDataDirectoryPath))
+				Directory.CreateDirectory (monoTorrentClientApplicationDataDirectoryPath);
 
-			DHTNodeFile = Path.Combine (monoTorrentClientWorkingDirectoryPath, "dhtNodes");
-			FastResumeFile = Path.Combine (monoTorrentClientWorkingDirectoryPath, "fastResume");
+			DHTNodeFile = Path.Combine (monoTorrentClientApplicationDataDirectoryPath, "dhtNodes");
+			FastResumeFile = Path.Combine (monoTorrentClientApplicationDataDirectoryPath, "fastResume");
 		}
 
 		public void Start()

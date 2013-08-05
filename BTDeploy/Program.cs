@@ -22,26 +22,24 @@ namespace BTDeploy
 
 		public static void Main (string[] args)
 		{
-			// Make application session directory.
-			var sessionDirectoryPath = Path.GetTempPath() + Assembly.GetExecutingAssembly().GetName().Name;
-			if (!Directory.Exists (sessionDirectoryPath))
-				Directory.CreateDirectory (sessionDirectoryPath);
+			// Make application data directory.
+			var applicationDataDirectoryPath = ApplicationDataDirectoryPath ();
 
 			// Handle if service-daemon command.
 			if (args.Any() && args.First () == ServiceDaemonCommand)
 			{
-				new TorrentClientDaemon (sessionDirectoryPath).Start();
+				new TorrentClientDaemon (applicationDataDirectoryPath).Start();
 				return;
 			}
 
 			// Get port of service-daemon.
-			int? port = ServiceDaemonPort (sessionDirectoryPath);
+			int? port = ServiceDaemonPort (applicationDataDirectoryPath);
 			if (!port.HasValue)
 			{
-				SpawnServiceDaemon (sessionDirectoryPath);
+				SpawnServiceDaemon (applicationDataDirectoryPath);
 				do
 				{
-					port = ServiceDaemonPort (sessionDirectoryPath);
+					port = ServiceDaemonPort (applicationDataDirectoryPath);
 					Thread.Sleep(500);
 				}
 				while(!port.HasValue);
@@ -51,6 +49,18 @@ namespace BTDeploy
 			var container = MakeContainer (port.Value);
 			var commands = container.Resolve<IEnumerable<ConsoleCommand>> ().Reverse();
 			ConsoleCommandDispatcher.DispatchCommand (commands, args, Console.Out);
+		}
+
+		protected static string ApplicationDataDirectoryPath()
+		{
+			var applicationName = Assembly.GetExecutingAssembly ().GetName ().Name;
+			var applicationDataDirectory = Environment.GetFolderPath (Environment.SpecialFolder.ApplicationData);
+
+			var thisApplicationDataDirectory = Path.Combine (applicationDataDirectory, applicationName);
+			if (!Directory.Exists (thisApplicationDataDirectory))
+				Directory.CreateDirectory (thisApplicationDataDirectory);
+
+			return thisApplicationDataDirectory;
 		}
 
 		protected static IContainer MakeContainer(int port)
@@ -68,10 +78,10 @@ namespace BTDeploy
 			return containerBuilder.Build ();
 		}
 
-		protected static int? ServiceDaemonPort(string sessionDirectoryPath)
+		protected static int? ServiceDaemonPort(string applicationDataDirectoryPath)
 		{
 			// Read port from file.
-			var portFilePath = Path.Combine (sessionDirectoryPath, "port");
+			var portFilePath = Path.Combine (applicationDataDirectoryPath, "port");
 
 			// Check if file exists.
 			if (!File.Exists (portFilePath))
@@ -88,7 +98,7 @@ namespace BTDeploy
 			return port;
 		}
 
-		protected static void SpawnServiceDaemon(string sessionDirectoryPath)
+		protected static void SpawnServiceDaemon(string applicationDataDirectoryPath)
 		{
 			var applicationPath = Assembly.GetExecutingAssembly ().Location;
 			var serviceDaemonStartInfo = new ProcessStartInfo();
