@@ -93,4 +93,7 @@
     <Folder Include="Client.Commands\" />
     <Folder Include="ServiceDaemon\" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
+  </ItemGroup>
 </Project>
