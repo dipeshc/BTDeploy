@@ -27,7 +27,8 @@ namespace BTDeploy.Client.Commands
 
 		public override int Run (string[] remainingArguments)
 		{
-			var postUri = "/api/torrents?OutputDirectoryPath=" + OuputDirectoryPath + "&mirror=" + Mirror.ToString();
+			var OutputDirectoryPathFull = Path.GetFullPath (OuputDirectoryPath);
+			var postUri = "/api/torrents?OutputDirectoryPath=" + OutputDirectoryPathFull + "&mirror=" + Mirror.ToString();
 			var addedTorrentDetails = Client.PostFile<TorrentDetails> (postUri, new FileInfo(TorrentPath), MimeTypes.GetMimeType (TorrentPath));
 
 			if (!Wait)
