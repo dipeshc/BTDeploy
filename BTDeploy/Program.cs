@@ -85,16 +85,13 @@ namespace BTDeploy
 
 			// Check if file exists.
 			if (!File.Exists (portFilePath))
-			{
 				return null;
-			}
 
 			// Check if port in use (i.e. serivce-daemon is running).
 			var port = int.Parse (File.ReadAllText (portFilePath));
 			if (SocketHelpers.IsTCPPortAvailable (port))
-			{
 				return null;
-			}
+
 			return port;
 		}
 
