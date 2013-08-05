@@ -78,6 +78,7 @@
     <Compile Include="ServiceDaemon\TorrentClients\MonoTorrentClient.cs" />
     <Compile Include="ServiceDaemon\TorrentClients\TorrentDetails.cs" />
     <Compile Include="Helpers\FileList.cs" />
+    <Compile Include="Client.Commands\Wait.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>

@@ -16,13 +16,12 @@ namespace BTDeploy.Client.Commands
 		public bool Mirror = false;
 		public bool Wait = false;
 
-		public Add (IRestClient client) : base(client)
+		public Add (IRestClient client) : base(client, "Adds a torrent to be deployed.")
 		{
-			IsCommand ("add", "Adds a torrent to be deployed.");
-			HasRequiredOption ("t|torrent=", "Torrent file path.", o => TorrentPath = o);
-			HasRequiredOption ("o|outputDirectory=", "Output directory path for downloaded torrent.", o => OuputDirectoryPath = o);
-			HasOption ("m|mirror", "Walks the output directory to make sure it mirrors the torrent. Any additional files will be deleted.", o => Mirror = o != null);
-			HasOption ("w|wait", "Wait for torrent to finish downloading before exiting.", o => Wait = o != null);
+			HasRequiredOption ("t|torrent=", "Torrent deployment file path.", o => TorrentPath = o);
+			HasRequiredOption ("o|outputDirectory=", "Output directory path for deployment.", o => OuputDirectoryPath = o);
+			HasOption ("m|mirror", "Walks the output directory to make sure it mirrors the deployment. Any additional files will be deleted.", o => Mirror = o != null);
+			HasOption ("w|wait", "Wait for deployment to finish downloading before exiting.", o => Wait = o != null);
 		}
 
 		public override int Run (string[] remainingArguments)
@@ -34,23 +33,8 @@ namespace BTDeploy.Client.Commands
 			if (!Wait)
 				return 0;
 
-			while(true)
-			{
-				Thread.Sleep(1000);
-
-				var trackedTorrentDetails = Client.Get (new TorrentsListRequest ()).First(torrentDetails => torrentDetails.Id == addedTorrentDetails.Id);
-
-				if (trackedTorrentDetails.Status == TorrentStatus.Error)
-					return 1;
-
-				if (trackedTorrentDetails.Status == TorrentStatus.Seeding)
-					break;
-
-				var downloadSpeedInKBs = Math.Round(trackedTorrentDetails.DownloadBytesPerSecond / Math.Pow(2, 10), 2);
-				Console.Write ("Completed {0:f2}%, {1:f2}KB/s\r", trackedTorrentDetails.Progress, downloadSpeedInKBs);
-			}
-
-			return 0;
+			var waitCommand = new Wait (Client);
+			return waitCommand.Run (new [] { addedTorrentDetails.Id });
 		}
 	}
 }

@@ -13,9 +13,8 @@ namespace BTDeploy.Client.Commands
 	{
 		public bool IncludeId = false;
 
-		public List (IRestClient client) : base(client)
+		public List (IRestClient client) : base(client, "List the current deployments.")
 		{
-			IsCommand ("list", "List the current deployments.");
 			HasOption ("id", "Include torrent id in output table.", o => IncludeId = o != null);
 		}
 

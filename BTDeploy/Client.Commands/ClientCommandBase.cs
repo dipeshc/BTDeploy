@@ -11,9 +11,11 @@ namespace BTDeploy.Client.Commands
 
 		protected bool Kill = false;
 
-		public ClientCommandBase (IRestClient client)
+		public ClientCommandBase (IRestClient client, string oneLineDescription)
 		{
 			Client = client;
+
+			IsCommand (this.GetType ().Name, oneLineDescription);
 
 			HasOption ("k|kill", "Terminates the long lasting background daemon, this process would otherwise continuing downloading and/or seeding after the application has exited.", o => Kill = o != null);
 

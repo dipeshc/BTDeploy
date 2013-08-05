@@ -10,16 +10,15 @@ namespace BTDeploy.Client.Commands
 	{
 		public bool Delete = false;
 
-		public Remove (IRestClient client) : base(client)
+		public Remove (IRestClient client) : base(client, "Removes one or more deployments with matching id/name/pattern (wildcards supported).")
 		{
-			IsCommand ("remove", "Removes one or more torrents with matching id/name/pattern (wildcards supported).");
-			HasOption ("d|delete", "Deletes the files along with the torrent.", o => Delete = o != null);
+			HasOption ("d|delete", "Deletes the files along with the torrent deployment file.", o => Delete = o != null);
 			HasAdditionalArguments (null);
 		}
 
 		public override int Run (string[] remainingArguments)
 		{
-			// Make the patterns.
+			// Set ids and patterns.
 			var ids = remainingArguments;
 			var patterns = remainingArguments.Select (p => new Wildcard (p, RegexOptions.IgnoreCase | RegexOptions.Compiled)).ToList();
 

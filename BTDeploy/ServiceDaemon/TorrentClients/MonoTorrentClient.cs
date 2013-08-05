@@ -136,11 +136,6 @@ namespace BTDeploy.ServiceDaemon.TorrentClients
 			// Create the torrent manager.
 			var torrentManager = new TorrentManager(torrent, outputDirectoryPath, DefaultTorrentSettings);
 
-			// Check if already added.
-			var existing = Engine.Torrents.FirstOrDefault (tm => tm.InfoHash.ToString () == torrentManager.InfoHash.ToString ());
-			if (existing != null)
-				return torrentManager.InfoHash.ToString ();
-
 			// Setup fast resume.
 			if (FastResume.ContainsKey (torrent.InfoHash.ToHex ()))
 				torrentManager.LoadFastResume (new FastResume ((BEncodedDictionary)FastResume [torrent.InfoHash.ToHex ()]));
