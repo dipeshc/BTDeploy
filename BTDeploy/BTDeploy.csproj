@@ -63,7 +63,6 @@
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Helpers\ConsoleTable.cs" />
-    <Compile Include="Helpers\FileSystem.cs" />
     <Compile Include="Helpers\SocketHelpers.cs" />
     <Compile Include="Helpers\Wildcard.cs" />
     <Compile Include="Client.Commands\Add.cs" />
@@ -79,6 +78,9 @@
     <Compile Include="ServiceDaemon\TorrentClients\TorrentDetails.cs" />
     <Compile Include="Helpers\FileList.cs" />
     <Compile Include="Client.Commands\Wait.cs" />
+    <Compile Include="Client.Commands\Create.cs" />
+    <Compile Include="Helpers\FileSystemHelpers.cs" />
+    <Compile Include="Helpers\StreamHelpers.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>

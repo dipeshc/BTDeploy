@@ -3,7 +3,7 @@ using System.IO;
 
 namespace BTDeploy.Helpers
 {
-	public static class FileSystem
+	public static class FileSystemHelpers
 	{
 		public static void DeleteEmptyDirectory(string directoryPath)
 		{

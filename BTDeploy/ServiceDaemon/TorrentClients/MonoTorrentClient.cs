@@ -179,6 +179,21 @@ namespace BTDeploy.ServiceDaemon.TorrentClients
 				Directory.Delete(torrentManager.SavePath, true);
 		}
 
+		public Stream Create (string fileSourceDirectory)
+		{
+			// Create source.
+			var source = new TorrentFileSource (fileSourceDirectory, true);
+
+			// Make creator.
+			var creator = new TorrentCreator ();
+			creator.PieceLength = TorrentCreator.RecommendedPieceSize (source.Files);
+
+			// Make torrent and return.
+			var torrent = new MemoryStream ();
+			creator.Create (source, torrent);
+			return torrent;
+		}
+
 		private TorrentDetails Convert(TorrentManager torrentManager)
 		{
 			var torrent = torrentManager.Torrent;

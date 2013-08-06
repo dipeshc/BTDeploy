@@ -27,6 +27,12 @@ namespace BTDeploy.ServiceDaemon
 		public bool DeleteFiles { get; set; }
 	}
 
+	[Route("/api/torrents/create", "POST")]
+	public class TorrentCreateRequest : IReturn
+	{
+		public string FileSourceDirectory { get; set; }
+	}
+
 	public class TorrentClientService : ServiceStack.ServiceInterface.Service
 	{
 		protected readonly ITorrentClient TorrentClient;
@@ -67,7 +73,7 @@ namespace BTDeploy.ServiceDaemon
 						File.Delete(currentFile);
 				});
 
-				FileSystem.DeleteEmptyDirectory (addedTorrentDetails.OutputDirectory);
+				FileSystemHelpers.DeleteEmptyDirectory (addedTorrentDetails.OutputDirectory);
 			}
 			
 			// Return the added torrent details.
@@ -77,6 +83,11 @@ namespace BTDeploy.ServiceDaemon
 		public void Delete(TorrentRemoveRequest request)
 		{
 			TorrentClient.Remove (request.Id, request.DeleteFiles);
+		}
+
+		public Stream Post(TorrentCreateRequest request)
+		{
+			return TorrentClient.Create (request.FileSourceDirectory);
 		}
 	}
 }
