@@ -49,17 +49,12 @@ namespace BTDeploy.ServiceDaemon
 
 		public ITorrentDetails Post(TorrentAddRequest request)
 		{
-			// Get the uploaded torrent file and save it temporarily.
+			// Get the uploaded torrent file.
 			var uploadedTorrentFile = base.RequestContext.Files.First ();
-			var tempTorrentFilePath = Path.Combine (Path.GetTempPath (), Path.GetTempFileName());
-			uploadedTorrentFile.SaveTo (tempTorrentFilePath);
 
-			// Add the torrent and ge the torrent details.
-			var addedTorrentId = TorrentClient.Add (tempTorrentFilePath, request.OutputDirectoryPath);
+			// Add the torrent and get the torrent details.
+			var addedTorrentId = TorrentClient.Add (uploadedTorrentFile.InputStream, request.OutputDirectoryPath);
 			var addedTorrentDetails = TorrentClient.List ().First (t => t.Id == addedTorrentId);
-
-			// Remove the temporarily file.
-			File.Delete (tempTorrentFilePath);
 
 			// Mirror.
 			if (request.Mirror)
