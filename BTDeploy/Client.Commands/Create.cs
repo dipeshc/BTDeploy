@@ -8,11 +8,13 @@ namespace BTDeploy.Client.Commands
 	{
 		public string FileSourceDirectory;
 		public string TorrentFile;
+		public bool Add = false;
 
 		public Create (IRestClient client) : base(client, "Adds a torrent to be deployed.")
 		{
-			HasRequiredOption ("f|FileSourceDirectory=", "Source files for torrent.", o => FileSourceDirectory = o);
-			HasRequiredOption ("t|TorrentFile=", "Name of torrent file to be created.", o => TorrentFile = o);
+			HasRequiredOption ("f|fileSourceDirectory=", "Source files for torrent.", o => FileSourceDirectory = o);
+			HasRequiredOption ("t|torrentFile=", "Name of torrent file to be created.", o => TorrentFile = o);
+			HasOption ("a|add", "Adds the torrent after it has been created.", o => Add = o != null);
 		}
 
 		public override int Run (string[] remainingArguments)
@@ -24,6 +26,17 @@ namespace BTDeploy.Client.Commands
 
 			using (var file = File.OpenWrite(torrentFilePath))
 				StreamHelpers.CopyStream (outputStream, file);
+
+			if (Add)
+			{
+				new Add(Client)
+				{
+					OuputDirectoryPath =  fileSourceDirectoryPath,
+					TorrentPath = torrentFilePath,
+					Mirror = false,
+					Wait = false
+				}.Run (new string[] {});
+			}
 
 			return 0;
 		}

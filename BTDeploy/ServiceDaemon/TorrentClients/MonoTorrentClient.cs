@@ -118,7 +118,7 @@ namespace BTDeploy.ServiceDaemon.TorrentClients
 		public string Add (Stream torrentFile, string outputDirectoryPath)
 		{
 			// Save torrent file.
-			var applicationDataTorrentFilePath = Path.Combine (TorrentFileDirectory, Path.GetTempFileName() + ".torrent");
+			var applicationDataTorrentFilePath = Path.Combine (TorrentFileDirectory, Path.GetFileName(Path.GetTempFileName()) + ".torrent");
 			using (var file = File.OpenWrite(applicationDataTorrentFilePath))
 				StreamHelpers.CopyStream (torrentFile, file);
 
@@ -136,15 +136,11 @@ namespace BTDeploy.ServiceDaemon.TorrentClients
 		protected string Add(Torrent torrent, string outputDirectoryPath)
 		{
 			// Create the torrent manager.
-			var torrentManager = new TorrentManager(torrent, outputDirectoryPath, DefaultTorrentSettings);
+			var torrentManager = new TorrentManager(torrent, outputDirectoryPath, DefaultTorrentSettings, "");
 
 			// Setup fast resume.
 			if (FastResume.ContainsKey (torrent.InfoHash.ToHex ()))
 				torrentManager.LoadFastResume (new FastResume ((BEncodedDictionary)FastResume [torrent.InfoHash.ToHex ()]));
-
-			// Register and start.
-			Engine.Register(torrentManager);
-			torrentManager.Start ();
 
 			// Add to mappings cache.
 			TorrentMappingsCache.RemoveAll (tmc => tmc.InfoHash == torrent.InfoHash.ToString ());
@@ -154,6 +150,10 @@ namespace BTDeploy.ServiceDaemon.TorrentClients
 				OutputDirectoryPath = outputDirectoryPath
 			});
 			TorrentMappingsCache.Save ();
+
+			// Register and start.
+			Engine.Register(torrentManager);
+			torrentManager.Start ();
 
 			// Return Id.
 			return torrentManager.InfoHash.ToString();
