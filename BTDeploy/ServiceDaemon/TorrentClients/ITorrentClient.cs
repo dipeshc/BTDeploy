@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using System.Collections.Generic;
 
 namespace BTDeploy.ServiceDaemon.TorrentClients
 {
@@ -8,7 +9,7 @@ namespace BTDeploy.ServiceDaemon.TorrentClients
 		ITorrentDetails[] List();
 		string Add(Stream torrentFile, string outputDirectoryPath);
 		void Remove(string Id, bool deleteFiles = false);
-		Stream Create(string fileSourceDirectory);
+		Stream Create(string fileSourceDirectory, IEnumerable<string> Trackers = null);
 	}
 
 	public interface ITorrentDetails

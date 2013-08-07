@@ -3,6 +3,7 @@ using System.IO;
 using System.Net;
 using System.Linq;
 using System.Threading;
+using MonoTorrent;
 using MonoTorrent.Client;
 using MonoTorrent.BEncoding;
 using MonoTorrent.Client.Encryption;
@@ -181,7 +182,7 @@ namespace BTDeploy.ServiceDaemon.TorrentClients
 				Directory.Delete(torrentManager.SavePath, true);
 		}
 
-		public Stream Create (string fileSourceDirectory)
+		public Stream Create (string fileSourceDirectory, IEnumerable<string> trackers = null)
 		{
 			// Create source.
 			var source = new TorrentFileSource (fileSourceDirectory, true);
@@ -189,6 +190,8 @@ namespace BTDeploy.ServiceDaemon.TorrentClients
 			// Make creator.
 			var creator = new TorrentCreator ();
 			creator.PieceLength = TorrentCreator.RecommendedPieceSize (source.Files);
+			if (trackers != null)
+				creator.Announces.Add (new RawTrackerTier(trackers));
 
 			// Make torrent and return.
 			var torrent = new MemoryStream ();

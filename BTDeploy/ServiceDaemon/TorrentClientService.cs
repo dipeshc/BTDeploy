@@ -5,6 +5,7 @@ using ServiceStack.ServiceInterface;
 using BTDeploy.ServiceDaemon.TorrentClients;
 using System.IO;
 using BTDeploy.Helpers;
+using System.Collections.Generic;
 
 namespace BTDeploy.ServiceDaemon
 {
@@ -31,6 +32,7 @@ namespace BTDeploy.ServiceDaemon
 	public class TorrentCreateRequest : IReturn
 	{
 		public string FileSourceDirectory { get; set; }
+		public IEnumerable<string> Trackers { get; set; }
 	}
 
 	public class TorrentClientService : ServiceStack.ServiceInterface.Service
@@ -82,7 +84,7 @@ namespace BTDeploy.ServiceDaemon
 
 		public Stream Post(TorrentCreateRequest request)
 		{
-			return TorrentClient.Create (request.FileSourceDirectory);
+			return TorrentClient.Create (request.FileSourceDirectory, request.Trackers);
 		}
 	}
 }
