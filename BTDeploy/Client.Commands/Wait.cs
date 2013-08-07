@@ -23,6 +23,10 @@ namespace BTDeploy.Client.Commands
 			// Get all the torrents.
 			var allTorrentDetails = Client.Get (new TorrentsListRequest ());
 
+			// If nothing specified we want it all.
+			if (!remainingArguments.Any ())
+				remainingArguments = new [] { "*" };
+
 			// Filter.
 			var torrentDetailsMatchIds = FilterByIdOrPattern (remainingArguments, allTorrentDetails)
 											.Select(td => td.Id).ToList();
@@ -35,14 +39,14 @@ namespace BTDeploy.Client.Commands
 													.Where(torrentDetails => torrentDetailsMatchIds.Contains(torrentDetails.Id))
 													.ToList();
 
-				var inProgressCount = trackedTorrentDetails.Count (td => td.Status == TorrentStatus.Hashing || td.Status == TorrentStatus.Downloading);
-				if (inProgressCount == 0)
+				var completedCount = trackedTorrentDetails.Count (td => td.Status != TorrentStatus.Hashing && td.Status != TorrentStatus.Downloading);
+				if (completedCount != 0)
 					break;
 
 				var progress = trackedTorrentDetails.Average (td => td.Progress);
 				var downloadSpeedInKBs = Math.Round(trackedTorrentDetails.Sum(td => td.DownloadBytesPerSecond) / Math.Pow(2, 10), 2);
 
-				Console.Write ("Completed {0}/{1}, {2:f2}%, {3:f2}KB/s\r", inProgressCount, trackedTorrentDetails.Count (), progress, downloadSpeedInKBs);
+				Console.Write ("Completed {0}/{1}, {2:f2}%, {3:f2}KB/s\r", completedCount, trackedTorrentDetails.Count (), progress, downloadSpeedInKBs);
 			}
 
 			return 0;
