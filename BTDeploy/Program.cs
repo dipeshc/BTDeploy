@@ -47,7 +47,7 @@ namespace BTDeploy
 
 			// Make container and dispatch command.
 			var container = MakeContainer (port.Value);
-			var commands = container.Resolve<IEnumerable<ConsoleCommand>> ().Reverse();
+			var commands = container.Resolve<IEnumerable<ConsoleCommand>> ().OrderBy (c => c.Command);
 			ConsoleCommandDispatcher.DispatchCommand (commands, args, Console.Out);
 		}
 
@@ -73,8 +73,10 @@ namespace BTDeploy
 					.As<ConsoleCommand> ()
 					.OwnedByLifetimeScope();
 			containerBuilder.RegisterType<JsonServiceClient> ()
-					.AsImplementedInterfaces()
-					.WithParameter (new NamedParameter ("baseUri", clientUri));
+					.AsImplementedInterfaces ()
+					.WithParameter (new NamedParameter ("baseUri", clientUri))
+					.WithProperty ("Timeout", new TimeSpan (0, 10, 0));
+
 			return containerBuilder.Build ();
 		}
 
