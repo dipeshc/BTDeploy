@@ -107,7 +107,14 @@ namespace BTDeploy.ServiceDaemon.TorrentClients
 			Directory.GetFiles (TorrentFileDirectory, "*.torrent").Select (Torrent.Load).ToList ().ForEach (torrent =>
 			{
 				var outputDirectoryPath = TorrentMappingsCache.First(tmc => tmc.InfoHash == torrent.InfoHash.ToString()).OutputDirectoryPath;
-				Add(torrent, outputDirectoryPath);
+				try
+				{
+					Add(torrent, outputDirectoryPath);
+				}
+				catch
+				{
+					Remove(torrent.InfoHash.ToString());
+				}
 			});
 		}
 
