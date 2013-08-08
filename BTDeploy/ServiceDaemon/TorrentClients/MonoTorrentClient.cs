@@ -137,12 +137,14 @@ namespace BTDeploy.ServiceDaemon.TorrentClients
 			// Load the torrent.
 			var torrent = Torrent.Load(torrentFile);
 
-			torrentFile.Position = 0;
-
 			// Save torrent file.
+			torrentFile.Position = 0;
 			var applicationDataTorrentFilePath = Path.Combine (TorrentFileDirectory, torrent.InfoHash.ToString() + ".torrent");
 			using (var file = File.OpenWrite(applicationDataTorrentFilePath))
 				StreamHelpers.CopyStream (torrentFile, file);
+
+			// Reload the torrent.
+			torrent = Torrent.Load(applicationDataTorrentFilePath);
 
 			// Create output directory.
 			if (!Directory.Exists (outputDirectoryPath))
