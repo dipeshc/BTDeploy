@@ -28,7 +28,16 @@ namespace BTDeploy
 			// Handle if service-daemon command.
 			if (args.Any() && args.First () == ServiceDaemonCommand)
 			{
-				new TorrentClientDaemon (applicationDataDirectoryPath).Start();
+				// Make the torrent client.
+				var monotTorrentClient = new MonoTorrentClient (applicationDataDirectoryPath);
+				monotTorrentClient.Start ();
+
+				// Make torrent service app host.
+				var servicesAppHost = new ServicesAppHost (applicationDataDirectoryPath, monotTorrentClient);
+				servicesAppHost.Init ();
+
+				// Never die.
+				Thread.Sleep (Timeout.Infinite);
 				return;
 			}
 
