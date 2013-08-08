@@ -6,14 +6,14 @@ using BTDeploy.ServiceDaemon;
 
 namespace BTDeploy.Client.Commands
 {
-	public class Create : ClientCommandBase
+	public class Create : GeneralConsoleCommandBase
 	{
 		public string FileSourceDirectory;
 		public string TorrentFile;
 		public IEnumerable<string> Trackers;
 		public bool Add = false;
 
-		public Create (IRestClient client) : base(client, "Adds a torrent to be deployed.")
+		public Create (IEnvironmentDetails environmentDetails, IRestClient client) : base(environmentDetails, client, "Adds a torrent to be deployed.")
 		{
 			HasRequiredOption ("f|fileSourceDirectory=", "Source files for torrent.", o => FileSourceDirectory = o);
 			HasRequiredOption ("t|torrentFile=", "Name of torrent file to be created.", o => TorrentFile = o);
@@ -37,7 +37,7 @@ namespace BTDeploy.Client.Commands
 
 			if (Add)
 			{
-				new Add(Client)
+				new Add(EnvironmentDetails, Client)
 				{
 					OuputDirectoryPath =  fileSourceDirectoryPath,
 					TorrentPath = torrentFilePath,

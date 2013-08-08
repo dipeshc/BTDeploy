@@ -9,11 +9,11 @@ using System.Collections.Generic;
 
 namespace BTDeploy.Client.Commands
 {
-	public class List : ClientCommandBase
+	public class List : GeneralConsoleCommandBase
 	{
 		public bool IncludeId = false;
 
-		public List (IRestClient client) : base(client, "Lists the current deployments. Filter deployments by providing torrent id or wildcard name pattern.")
+		public List (IEnvironmentDetails environmentDetails, IRestClient client) : base(environmentDetails, client, "Lists the current deployments. Filter deployments by providing torrent id or wildcard name pattern.")
 		{
 			HasOption ("id", "Include torrent id in output table.", o => IncludeId = o != null);
 			HasAdditionalArguments (null);

@@ -66,7 +66,6 @@
     <Compile Include="Helpers\SocketHelpers.cs" />
     <Compile Include="Helpers\Wildcard.cs" />
     <Compile Include="Client.Commands\Add.cs" />
-    <Compile Include="Client.Commands\ClientCommandBase.cs" />
     <Compile Include="Client.Commands\List.cs" />
     <Compile Include="Client.Commands\Remove.cs" />
     <Compile Include="ServiceDaemon\AdminService.cs" />
@@ -79,8 +78,11 @@
     <Compile Include="Client.Commands\Create.cs" />
     <Compile Include="Helpers\FileSystemHelpers.cs" />
     <Compile Include="Helpers\StreamHelpers.cs" />
-    <Compile Include="Client.Commands\Admin.cs" />
     <Compile Include="ServiceDaemon\ServicesAppHost.cs" />
+    <Compile Include="Client.Commands\Admin.cs" />
+    <Compile Include="EnvironmentDetails.cs" />
+    <Compile Include="IEnvironmentDetails.cs" />
+    <Compile Include="Client.Commands\GeneralConsoleCommandBase.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>

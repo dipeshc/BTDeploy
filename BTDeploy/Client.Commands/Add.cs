@@ -9,14 +9,14 @@ using System;
 
 namespace BTDeploy.Client.Commands
 {
-	public class Add : ClientCommandBase
+	public class Add : GeneralConsoleCommandBase
 	{
 		public string TorrentPath;
 		public string OuputDirectoryPath;
 		public bool Mirror = false;
 		public bool Wait = false;
 
-		public Add (IRestClient client) : base(client, "Adds a torrent to be deployed.")
+		public Add (IEnvironmentDetails environmentDetails, IRestClient client) : base(environmentDetails, client, "Adds a torrent to be deployed.")
 		{
 			HasRequiredOption ("t|torrent=", "Torrent deployment file path.", o => TorrentPath = o);
 			HasRequiredOption ("o|outputDirectory=", "Output directory path for deployment.", o => OuputDirectoryPath = o);
@@ -33,7 +33,7 @@ namespace BTDeploy.Client.Commands
 			if (!Wait)
 				return 0;
 
-			var waitCommand = new Wait (Client);
+			var waitCommand = new Wait (EnvironmentDetails, Client);
 			return waitCommand.Run (new [] { addedTorrentDetails.Id });
 		}
 	}

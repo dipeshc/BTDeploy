@@ -18,113 +18,53 @@ namespace BTDeploy
 {
 	public class Program
 	{
-		protected static readonly string ServiceDaemonCommand = "service-daemon";
-
 		public static void Main (string[] args)
 		{
-			// Make application data directory.
-			var applicationDataDirectoryPath = ApplicationDataDirectoryPath ();
+			// Make environment details.
+			var environmentDetails = new EnvironmentDetails ();
 
-			// Handle if service-daemon command.
-			if (args.Any() && args.First () == ServiceDaemonCommand)
-			{
-				// Make the torrent client.
-				var monotTorrentClient = new MonoTorrentClient (applicationDataDirectoryPath);
-				monotTorrentClient.Start ();
-
-				// Make torrent service app host.
-				var servicesAppHost = new ServicesAppHost (applicationDataDirectoryPath, monotTorrentClient);
-				servicesAppHost.Init ();
-
-				// Never die.
-				Thread.Sleep (Timeout.Infinite);
-				return;
-			}
-
-			// Get port of service-daemon.
-			int? port = ServiceDaemonPort (applicationDataDirectoryPath);
-			if (!port.HasValue)
-			{
-				SpawnServiceDaemon (applicationDataDirectoryPath);
-				do
-				{
-					port = ServiceDaemonPort (applicationDataDirectoryPath);
-					Thread.Sleep(500);
-				}
-				while(!port.HasValue);
-			}
-
-			// Make container and dispatch command.
-			var container = MakeContainer (port.Value);
-			var commands = container.Resolve<IEnumerable<ConsoleCommand>> ().OrderBy (c => c.Command);
-			ConsoleCommandDispatcher.DispatchCommand (commands, args, Console.Out);
+			// Run as service deamon otherwise as client commands.
+			if (args.Any () && args.First () == environmentDetails.ServiceDaemonCommand)
+				RunServiceDaemon (environmentDetails);
+			else
+				RunClientCommand (environmentDetails, args);
 		}
 
-		protected static string ApplicationDataDirectoryPath()
+		protected static void RunServiceDaemon(IEnvironmentDetails environmentDetails)
 		{
-			var applicationName = Assembly.GetExecutingAssembly ().GetName ().Name;
-			var applicationDataDirectory = Environment.GetFolderPath (Environment.SpecialFolder.ApplicationData);
+			// Make the torrent client.
+			var monotTorrentClient = new MonoTorrentClient (environmentDetails.ApplicationDataDirectoryPath);
+			monotTorrentClient.Start ();
 
-			var thisApplicationDataDirectory = Path.Combine (applicationDataDirectory, applicationName);
-			if (!Directory.Exists (thisApplicationDataDirectory))
-				Directory.CreateDirectory (thisApplicationDataDirectory);
+			// Make torrent service app host.
+			var servicesAppHost = new ServicesAppHost (environmentDetails, monotTorrentClient);
+			servicesAppHost.Init ();
 
-			return thisApplicationDataDirectory;
+			// Never die.
+			Thread.Sleep (Timeout.Infinite);
 		}
 
-		protected static IContainer MakeContainer(int port)
+		public static void RunClientCommand(IEnvironmentDetails environmentDetails, string[] args)
 		{
-			var clientUri = string.Format ("http://localhost:{0}/", port);
-
+			// Make the container.
 			var containerBuilder = new ContainerBuilder();
 			containerBuilder.RegisterAssemblyTypes (typeof(Program).Assembly)
 					.Where (t => t.IsAssignableTo<ConsoleCommand> ())
 					.As<ConsoleCommand> ()
 					.OwnedByLifetimeScope();
-			containerBuilder.RegisterType<JsonServiceClient> ()
+			containerBuilder.RegisterType<EnvironmentDetails> ()
 					.AsImplementedInterfaces ()
-					.WithParameter (new NamedParameter ("baseUri", clientUri))
-					.WithProperty ("Timeout", new TimeSpan (0, 10, 0));
+					.OwnedByLifetimeScope ();
+			containerBuilder.RegisterType<JsonServiceClient> ()
+					.WithParameter (new NamedParameter ("baseUri", environmentDetails.ServiceDaemonEndpoint))
+					.WithProperty ("Timeout", new TimeSpan (0, 10, 0))
+					.AsImplementedInterfaces ()
+					.OwnedByLifetimeScope ();
+			var container = containerBuilder.Build ();
 
-			return containerBuilder.Build ();
-		}
-
-		protected static int? ServiceDaemonPort(string applicationDataDirectoryPath)
-		{
-			// Read port from file.
-			var portFilePath = Path.Combine (applicationDataDirectoryPath, "port");
-
-			// Check if file exists.
-			if (!File.Exists (portFilePath))
-				return null;
-
-			// Check if port in use (i.e. serivce-daemon is running).
-			var port = int.Parse (File.ReadAllText (portFilePath));
-			if (SocketHelpers.IsTCPPortAvailable (port))
-				return null;
-
-			return port;
-		}
-
-		protected static void SpawnServiceDaemon(string applicationDataDirectoryPath)
-		{
-			var applicationPath = Assembly.GetExecutingAssembly ().Location;
-			var serviceDaemonStartInfo = new ProcessStartInfo();
-			serviceDaemonStartInfo.UseShellExecute = false;
-			serviceDaemonStartInfo.RedirectStandardOutput = true;
-			serviceDaemonStartInfo.RedirectStandardError = true;
-
-			if (Type.GetType ("Mono.Runtime") == null)
-			{
-				serviceDaemonStartInfo.FileName = applicationPath;
-				serviceDaemonStartInfo.Arguments = ServiceDaemonCommand;
-			}
-			else
-			{
-				serviceDaemonStartInfo.FileName = "/usr/bin/mono"; // Should probably be resolving this dynamically!!
-				serviceDaemonStartInfo.Arguments = string.Format ("{0} {1}", applicationPath, ServiceDaemonCommand);
-			}
-			Process.Start (serviceDaemonStartInfo);
+			// Get the commands and run them.
+			var commands = container.Resolve<IEnumerable<ConsoleCommand>> ().OrderBy (c => c.Command);
+			ConsoleCommandDispatcher.DispatchCommand (commands, args, Console.Out);
 		}
 	}
 }

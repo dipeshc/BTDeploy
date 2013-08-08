@@ -6,11 +6,11 @@ using System.Text.RegularExpressions;
 
 namespace BTDeploy.Client.Commands
 {
-	public class Remove : ClientCommandBase
+	public class Remove : GeneralConsoleCommandBase
 	{
 		public bool Delete = false;
 
-		public Remove (IRestClient client) : base(client, "Removes specified deployments. Specify deployments by providing torrent id or wildcard name pattern.")
+		public Remove (IEnvironmentDetails environmentDetails, IRestClient client) : base(environmentDetails, client, "Removes specified deployments. Specify deployments by providing torrent id or wildcard name pattern.")
 		{
 			HasOption ("d|delete", "Deletes the files along with the torrent deployment file.", o => Delete = o != null);
 			HasAdditionalArguments (null);
