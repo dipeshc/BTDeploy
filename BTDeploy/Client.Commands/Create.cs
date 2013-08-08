@@ -13,7 +13,7 @@ namespace BTDeploy.Client.Commands
 		public IEnumerable<string> Trackers;
 		public bool Add = false;
 
-		public Create (IEnvironmentDetails environmentDetails, IRestClient client) : base(environmentDetails, client, "Adds a torrent to be deployed.")
+		public Create (IEnvironmentDetails environmentDetails, IRestClient client) : base(environmentDetails, client, "Creates a new torrent from a file source.")
 		{
 			HasRequiredOption ("f|fileSourceDirectory=", "Source files for torrent.", o => FileSourceDirectory = o);
 			HasRequiredOption ("t|torrentFile=", "Name of torrent file to be created.", o => TorrentFile = o);
