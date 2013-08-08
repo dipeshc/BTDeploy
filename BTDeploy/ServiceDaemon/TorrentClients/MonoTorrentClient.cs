@@ -22,6 +22,7 @@ namespace BTDeploy.ServiceDaemon.TorrentClients
 		public int DefaultTorrentOpenConnections = 150;
 
 		protected readonly string TorrentFileDirectory;
+		protected readonly string BrokenTorrentFileDirectory;
 		protected readonly string DHTNodeFile;
 		protected readonly string FastResumeFile;
 		protected readonly string TorrentMappingsCacheFile;
@@ -40,6 +41,10 @@ namespace BTDeploy.ServiceDaemon.TorrentClients
 			TorrentFileDirectory = Path.Combine (monoTorrentClientApplicationDataDirectoryPath, "torrents");
 			if (!Directory.Exists (TorrentFileDirectory))
 				Directory.CreateDirectory (TorrentFileDirectory);
+
+			BrokenTorrentFileDirectory = Path.Combine (monoTorrentClientApplicationDataDirectoryPath, "broken");
+			if (!Directory.Exists (BrokenTorrentFileDirectory))
+				Directory.CreateDirectory (BrokenTorrentFileDirectory);
 
 			// Make files.
 			DHTNodeFile = Path.Combine (monoTorrentClientApplicationDataDirectoryPath, "dhtNodes");
@@ -104,8 +109,9 @@ namespace BTDeploy.ServiceDaemon.TorrentClients
 					.ToList ().ForEach (t => File.Delete(t.TorrentPath));
 
 			// Reload the torrents and add them.
-			Directory.GetFiles (TorrentFileDirectory, "*.torrent").Select (Torrent.Load).ToList ().ForEach (torrent =>
+			Directory.GetFiles (TorrentFileDirectory, "*.torrent").ToList ().ForEach (torrentFile =>
 			{
+				var torrent = Torrent.Load(torrentFile);
 				var outputDirectoryPath = TorrentMappingsCache.First(tmc => tmc.InfoHash == torrent.InfoHash.ToString()).OutputDirectoryPath;
 				try
 				{
@@ -113,6 +119,9 @@ namespace BTDeploy.ServiceDaemon.TorrentClients
 				}
 				catch
 				{
+					var brokenTorrentFileName = Path.GetFileName(torrentFile);
+					var brokenTorrentFilePath = System.IO.Path.Combine(BrokenTorrentFileDirectory, brokenTorrentFileName);
+					File.Copy(torrentFile, brokenTorrentFilePath, true);
 					Remove(torrent.InfoHash.ToString());
 				}
 			});

@@ -47,7 +47,7 @@ namespace BTDeploy.Client.Commands
 				var progress = trackedTorrentDetails.Average (td => td.Progress);
 				var downloadSpeedInKBs = Math.Round(trackedTorrentDetails.Sum(td => td.DownloadBytesPerSecond) / Math.Pow(2, 10), 2);
 
-				Console.Write ("Completed {0}/{1}, {2:f2}%, {3:f2}KB/s\r", completedCount, trackedTorrentDetailsCount, progress, downloadSpeedInKBs);
+				Console.Write ("Completed {0}/{1}, Down {2:f2}%, Up {3:f2}KB/s\r", completedCount, trackedTorrentDetailsCount, progress, downloadSpeedInKBs);
 
 				if(completedCount == trackedTorrentDetailsCount)
 					break;
