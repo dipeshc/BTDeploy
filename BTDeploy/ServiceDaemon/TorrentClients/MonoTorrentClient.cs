@@ -134,8 +134,13 @@ namespace BTDeploy.ServiceDaemon.TorrentClients
 
 		public string Add (Stream torrentFile, string outputDirectoryPath)
 		{
+			// Load the torrent.
+			var torrent = Torrent.Load(torrentFile);
+
+			torrentFile.Position = 0;
+
 			// Save torrent file.
-			var applicationDataTorrentFilePath = Path.Combine (TorrentFileDirectory, Path.GetFileName(Path.GetTempFileName()) + ".torrent");
+			var applicationDataTorrentFilePath = Path.Combine (TorrentFileDirectory, torrent.InfoHash.ToString() + ".torrent");
 			using (var file = File.OpenWrite(applicationDataTorrentFilePath))
 				StreamHelpers.CopyStream (torrentFile, file);
 
@@ -143,8 +148,6 @@ namespace BTDeploy.ServiceDaemon.TorrentClients
 			if (!Directory.Exists (outputDirectoryPath))
 				Directory.CreateDirectory (outputDirectoryPath);
 
-			// Load the torrent.
-			var torrent = Torrent.Load (applicationDataTorrentFilePath);
 
 			// Finally add.
 			return Add (torrent, outputDirectoryPath);
