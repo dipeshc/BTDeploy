@@ -22,7 +22,7 @@ Process will exit once download complete. Daemon process will seed asynchronousl
 BTDeploy add -w -t <path to torrent 1> -o <deployment directory path 1>
 ...
 BTDeploy add -w -t <path to torrent N> -o <deployment directory path N>
-BTDeploy wait -k *
+BTDeploy wait --stop *
 ```
 
 
