@@ -28,11 +28,14 @@ namespace BTDeploy.Client.Commands
 			torrentDetailsMatches.ToList().ForEach (torrentDetails =>
 			{
 				Client.Delete(new TorrentRemoveRequest
-              	{
+              			{
 					Id = torrentDetails.Id,
 					DeleteFiles = Delete
 				});
 			});
+
+			if (torrentDetailsMatches.Count () == 0)
+				Kill = true;
 
 			return 0;
 		}
