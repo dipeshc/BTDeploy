@@ -3,6 +3,7 @@ using System.Linq;
 using BTDeploy.Helpers;
 using BTDeploy.ServiceDaemon;
 using System.Text.RegularExpressions;
+using System.Threading;
 
 namespace BTDeploy.Client.Commands
 {
@@ -32,9 +33,10 @@ namespace BTDeploy.Client.Commands
 					Id = torrentDetails.Id,
 					DeleteFiles = Delete
 				});
+				allTorrentDetails = allTorrentDetails.Where(d => d != torrentDetails).ToArray();
 			});
 
-			if (torrentDetailsMatches.Count () == 0)
+			if (allTorrentDetails.Count () == 0) 
 				Kill = true;
 
 			return 0;
