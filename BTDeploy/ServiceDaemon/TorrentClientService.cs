@@ -31,6 +31,7 @@ namespace BTDeploy.ServiceDaemon
 	[Route("/api/torrents/create", "POST")]
 	public class TorrentCreateRequest : IReturn
 	{
+		public string Name { get; set; }
 		public string FileSourceDirectory { get; set; }
 		public IEnumerable<string> Trackers { get; set; }
 	}
@@ -84,7 +85,7 @@ namespace BTDeploy.ServiceDaemon
 
 		public Stream Post(TorrentCreateRequest request)
 		{
-			return TorrentClient.Create (request.FileSourceDirectory, request.Trackers);
+			return TorrentClient.Create (request.Name, request.FileSourceDirectory, request.Trackers);
 		}
 	}
 }

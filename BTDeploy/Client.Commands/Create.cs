@@ -8,15 +8,15 @@ namespace BTDeploy.Client.Commands
 {
 	public class Create : GeneralConsoleCommandBase
 	{
+		public string Name;
 		public string FileSourceDirectory;
-		public string TorrentFile;
 		public IEnumerable<string> Trackers;
 		public bool Add = false;
 
 		public Create (IEnvironmentDetails environmentDetails, IRestClient client) : base(environmentDetails, client, "Creates a new torrent from a file source.")
 		{
+			HasRequiredOption ("n|name=", "Name of the torrent to be created.", o => Name = o);
 			HasRequiredOption ("f|fileSourceDirectory=", "Source files for torrent.", o => FileSourceDirectory = o);
-			HasRequiredOption ("t|torrentFile=", "Name of torrent file to be created.", o => TorrentFile = o);
 			HasOption ("trackers=", "Trackers to add to the torrent. Comma seperation for more than one.", o => Trackers = o.Split (','));
 			HasOption ("a|add", "Adds the torrent after it has been created.", o => Add = o != null);
 		}
@@ -24,10 +24,11 @@ namespace BTDeploy.Client.Commands
 		public override int Run (string[] remainingArguments)
 		{
 			var fileSourceDirectoryPath = Path.GetFullPath (FileSourceDirectory);
-			var torrentFilePath = Path.GetFullPath (TorrentFile);
+			var torrentFilePath = Path.GetFullPath (Name + ".torrent");
 
 			var outputStream = Client.Post<Stream> ("/api/torrents/create", new TorrentCreateRequest
 			{
+				Name = Name,
 				FileSourceDirectory = fileSourceDirectoryPath,
 				Trackers = Trackers
 			});

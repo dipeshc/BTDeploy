@@ -203,21 +203,26 @@ namespace BTDeploy.ServiceDaemon.TorrentClients
 				Directory.Delete(torrentManager.SavePath, true);
 		}
 
-		public Stream Create (string fileSourceDirectory, IEnumerable<string> trackers = null)
+		public Stream Create (string name, string fileSourceDirectory, IEnumerable<string> trackers = null)
 		{
-			// Create source.
-			var source = new TorrentFileSource (fileSourceDirectory, true);
+			// Create torrent file mappings.
+			var fileMappings = new TorrentFileSource (fileSourceDirectory, true).Files.Select (fm =>
+			{
+				var info = new FileInfo (fm.Source);
+				return new TorrentFile (fm.Destination, info.Length, fm.Source);
+			}).ToList();
 
 			// Make creator.
 			var creator = new TorrentCreator ();
-			creator.PieceLength = TorrentCreator.RecommendedPieceSize (source.Files);
+			creator.PieceLength = TorrentCreator.RecommendedPieceSize (fileMappings);
 			if (trackers != null)
 				creator.Announces.Add (new RawTrackerTier(trackers));
 
-			// Make torrent and return.
-			var torrent = new MemoryStream ();
-			creator.Create (source, torrent);
-			return torrent;
+			// Make torrent, convert to stream and return.
+			var torrentStream = new MemoryStream ();
+			var torrentRAW = creator.Create (name, fileMappings).Encode ();
+			torrentStream.Write(torrentRAW, 0, torrentRAW.Length);
+			return torrentStream;
 		}
 
 		private TorrentDetails Convert(TorrentManager torrentManager)

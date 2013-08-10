@@ -251,7 +251,7 @@ namespace MonoTorrent.Common {
             File.WriteAllBytes(savePath, Create(fileSource).Encode());
         }
 
-        internal BEncodedDictionary Create(string name, List<TorrentFile> files)
+        public BEncodedDictionary Create(string name, List<TorrentFile> files)
         {
             if (PieceLength == 0)
                 PieceLength = RecommendedPieceSize(files);
