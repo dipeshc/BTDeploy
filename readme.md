@@ -30,7 +30,7 @@ BTDeploy wait --stop *
 BTDeploy create -n <torrent name> -f <deployment file source> --trackers <comma seperated list of trackers>
 ```
 
-### Create a deployment torrent and start seeding it.
+#### Create a deployment torrent and start seeding it.
 ```shell
 BTDeploy create -n <torrent name> -f <deployment file source> --trackers <comma seperated list of trackers> -a
 ```
