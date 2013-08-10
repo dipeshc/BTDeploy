@@ -25,6 +25,15 @@ BTDeploy add -w -t <path to torrent N> -o <deployment directory path N>
 BTDeploy wait --stop *
 ```
 
+#### Create a deployment torrent.
+```shell
+BTDeploy create -n <torrent name> -f <deployment file source> --trackers <comma seperated list of trackers>
+```
+
+### Create a deployment torrent and start seeding it.
+```shell
+BTDeploy create -n <torrent name> -f <deployment file source> --trackers <comma seperated list of trackers> -a
+```
 
 ### Handy Trick
 Diffs will only be downloaded for newer versions of a file collection. This is due to the hash checking done before downloading. Hence only the blocks of files that are different will be downloaded. Used in combination with the --mirror flag, identical new versions of file collections will be deployed in no time.
