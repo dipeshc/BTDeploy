@@ -9,7 +9,7 @@ namespace BTDeploy.ServiceDaemon.TorrentClients
 		ITorrentDetails[] List();
 		string Add(Stream torrentFile, string outputDirectoryPath);
 		void Remove(string Id, bool deleteFiles = false);
-		Stream Create(string name, string fileSourceDirectory, IEnumerable<string> Trackers = null);
+		Stream Create(string name, string filesSource, IEnumerable<string> Trackers = null);
 	}
 
 	public interface ITorrentDetails

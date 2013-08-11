@@ -6,6 +6,7 @@ using BTDeploy.ServiceDaemon.TorrentClients;
 using System.IO;
 using BTDeploy.Helpers;
 using System.Collections.Generic;
+using ServiceStack.Common.Web;
 
 namespace BTDeploy.ServiceDaemon
 {
@@ -32,7 +33,7 @@ namespace BTDeploy.ServiceDaemon
 	public class TorrentCreateRequest : IReturn
 	{
 		public string Name { get; set; }
-		public string FileSourceDirectory { get; set; }
+		public string FilesSource { get; set; }
 		public IEnumerable<string> Trackers { get; set; }
 	}
 
@@ -54,6 +55,11 @@ namespace BTDeploy.ServiceDaemon
 		{
 			// Get the uploaded torrent file.
 			var uploadedTorrentFile = base.RequestContext.Files.First ();
+			var outputDirectoryPath = request.OutputDirectoryPath;
+
+			// Check output directory isn't a file.
+			if (File.Exists (outputDirectoryPath))
+				throw HttpError.Conflict ("OutputDirectoryPath already exists as a file. OutputDirectoryPath must be a directory or not exist.");
 
 			// Add the torrent and get the torrent details.
 			var addedTorrentId = TorrentClient.Add (uploadedTorrentFile.InputStream, request.OutputDirectoryPath);
@@ -85,7 +91,7 @@ namespace BTDeploy.ServiceDaemon
 
 		public Stream Post(TorrentCreateRequest request)
 		{
-			return TorrentClient.Create (request.Name, request.FileSourceDirectory, request.Trackers);
+			return TorrentClient.Create (request.Name, request.FilesSource, request.Trackers);
 		}
 	}
 }

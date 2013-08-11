@@ -9,27 +9,27 @@ namespace BTDeploy.Client.Commands
 	public class Create : GeneralConsoleCommandBase
 	{
 		public string Name;
-		public string FileSourceDirectory;
+		public string FilesSource;
 		public IEnumerable<string> Trackers;
 		public bool Add = false;
 
 		public Create (IEnvironmentDetails environmentDetails, IRestClient client) : base(environmentDetails, client, "Creates a new torrent from a file source.")
 		{
 			HasRequiredOption ("n|name=", "Name of the torrent to be created.", o => Name = o);
-			HasRequiredOption ("f|fileSourceDirectory=", "Source files for torrent.", o => FileSourceDirectory = o);
+			HasRequiredOption ("f|fileSource=", "Source file/s for torrent.", o => FilesSource = o);
 			HasOption ("trackers=", "Trackers to add to the torrent. Comma seperation for more than one.", o => Trackers = o.Split (','));
 			HasOption ("a|add", "Adds the torrent after it has been created.", o => Add = o != null);
 		}
 
 		public override int Run (string[] remainingArguments)
 		{
-			var fileSourceDirectoryPath = Path.GetFullPath (FileSourceDirectory);
+			var filesSourcePath = Path.GetFullPath (FilesSource);
 			var torrentFilePath = Path.GetFullPath (Name + ".torrent");
 
 			var outputStream = Client.Post<Stream> ("/api/torrents/create", new TorrentCreateRequest
 			{
 				Name = Name,
-				FileSourceDirectory = fileSourceDirectoryPath,
+				FilesSource = filesSourcePath,
 				Trackers = Trackers
 			});
 
@@ -38,9 +38,16 @@ namespace BTDeploy.Client.Commands
 
 			if (Add)
 			{
+				// If file source is one file, need to adjust the output path to be the current directory.
+				string ouputDirectoryPath;
+				if (File.Exists (FilesSource))
+					ouputDirectoryPath = Path.GetDirectoryName (FilesSource);
+				else
+					ouputDirectoryPath = FilesSource;
+
 				new Add(EnvironmentDetails, Client)
 				{
-					OuputDirectoryPath =  fileSourceDirectoryPath,
+					OuputDirectoryPath =  ouputDirectoryPath,
 					TorrentPath = torrentFilePath,
 					Mirror = false,
 					Wait = false

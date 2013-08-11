@@ -6,6 +6,7 @@ using BTDeploy.ServiceDaemon;
 using System.Linq;
 using System.Threading;
 using System;
+using ServiceStack.ServiceClient.Web;
 
 namespace BTDeploy.Client.Commands
 {
@@ -28,13 +29,23 @@ namespace BTDeploy.Client.Commands
 		{
 			var OutputDirectoryPathFull = Path.GetFullPath (OuputDirectoryPath);
 			var postUri = "/api/torrents?OutputDirectoryPath=" + OutputDirectoryPathFull + "&mirror=" + Mirror.ToString();
-			var addedTorrentDetails = Client.PostFile<TorrentDetails> (postUri, new FileInfo(TorrentPath), MimeTypes.GetMimeType (TorrentPath));
+
+			string addedTorrentDetailsId;
+			try
+			{
+				addedTorrentDetailsId = Client.PostFile<TorrentDetails> (postUri, new FileInfo(TorrentPath), MimeTypes.GetMimeType (TorrentPath)).Id;
+			}
+			catch(WebServiceException e)
+			{
+				Console.WriteLine ("Error: {0}", e.StatusDescription);
+				return 1;
+			}
 
 			if (!Wait)
 				return 0;
 
 			var waitCommand = new Wait (EnvironmentDetails, Client);
-			return waitCommand.Run (new [] { addedTorrentDetails.Id });
+			return waitCommand.Run (new [] { addedTorrentDetailsId });
 		}
 	}
 }

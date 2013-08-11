@@ -203,10 +203,10 @@ namespace BTDeploy.ServiceDaemon.TorrentClients
 				Directory.Delete(torrentManager.SavePath, true);
 		}
 
-		public Stream Create (string name, string fileSourceDirectory, IEnumerable<string> trackers = null)
+		public Stream Create (string name, string filesSource, IEnumerable<string> trackers = null)
 		{
 			// Create torrent file mappings.
-			var fileMappings = new TorrentFileSource (fileSourceDirectory, true).Files.Select (fm =>
+			var fileMappings = new TorrentFileSource (filesSource, true).Files.Select (fm =>
 			{
 				var info = new FileInfo (fm.Source);
 				return new TorrentFile (fm.Destination, info.Length, fm.Source);
