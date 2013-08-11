@@ -18,25 +18,19 @@ namespace BTDeploy.Client.Commands
 		protected readonly IRestClient Client;
 
 		protected bool Start = true;
-		protected bool Kill = false;
+		protected bool Kill = true;
 
 		public GeneralConsoleCommandBase (IEnvironmentDetails environmentDetails, IRestClient client, string oneLineDescription)
 		{
 			// Set the base commands.
 			IsCommand (this.GetType ().Name, oneLineDescription);
 			HasOption ("noStart", "Prevents the long lasting process from being spawned automatically", o => Start = o == null);
-			HasOption ("stop", "Terminates the long lasting background daemon, this process would otherwise continuing downloading and/or seeding after the application has exited.", o => Kill = o != null);
+			HasOption ("noStop", "Prevents the long lasting background daemon from being killed, this process will continue downloading and/or seeding after the application has exited.", o => Kill = o == null);
 			SkipsCommandSummaryBeforeRunning ();
 
 			// Set common items.
 			EnvironmentDetails = environmentDetails;
 			Client = client;
-
-			// Before dieing, send stop request.
-			AppDomain.CurrentDomain.ProcessExit += (sender, e) =>
-			{
-				if (Kill) new Admin(environmentDetails, client) { Stop = true }.Run (new string[] { });
-			};
 		}
 
 		public override int? OverrideAfterHandlingArgumentsBeforeRun (string[] remainingArguments)
@@ -48,6 +42,13 @@ namespace BTDeploy.Client.Commands
 				while(SocketHelpers.IsTCPPortAvailable(EnvironmentDetails.ServiceDaemonPort))
 					Thread.Sleep(500);
 			}
+
+			// Before dying, send stop request.
+			AppDomain.CurrentDomain.ProcessExit += (sender, e) =>
+			{
+				if (Kill && Client.Get (new TorrentsListRequest ()).Count() == 0) 
+					new Admin(EnvironmentDetails, Client) { Stop = true }.Run (new string[] {});
+			};
 
 			return base.OverrideAfterHandlingArgumentsBeforeRun (remainingArguments);
 		}

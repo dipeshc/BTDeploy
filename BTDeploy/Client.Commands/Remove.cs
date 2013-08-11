@@ -3,6 +3,7 @@ using System.Linq;
 using BTDeploy.Helpers;
 using BTDeploy.ServiceDaemon;
 using System.Text.RegularExpressions;
+using System.Threading;
 
 namespace BTDeploy.Client.Commands
 {
@@ -28,7 +29,7 @@ namespace BTDeploy.Client.Commands
 			torrentDetailsMatches.ToList().ForEach (torrentDetails =>
 			{
 				Client.Delete(new TorrentRemoveRequest
-              	{
+              			{
 					Id = torrentDetails.Id,
 					DeleteFiles = Delete
 				});
