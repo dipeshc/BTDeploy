@@ -40,10 +40,10 @@ namespace BTDeploy.Client.Commands
 			{
 				// If file source is one file, need to adjust the output path to be the current directory.
 				string ouputDirectoryPath;
-				if (File.Exists (FilesSource))
-					ouputDirectoryPath = Path.GetDirectoryName (FilesSource);
+				if (File.Exists (filesSourcePath))
+					ouputDirectoryPath = Path.GetDirectoryName (filesSourcePath);
 				else
-					ouputDirectoryPath = FilesSource;
+					ouputDirectoryPath = filesSourcePath;
 
 				new Add(EnvironmentDetails, Client)
 				{
