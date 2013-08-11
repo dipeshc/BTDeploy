@@ -6,6 +6,7 @@ using BTDeploy.Helpers;
 using BTDeploy.ServiceDaemon;
 using ManyConsole;
 using ServiceStack.Service;
+using System.Net;
 
 namespace BTDeploy.Client.Commands
 {
@@ -30,16 +31,33 @@ namespace BTDeploy.Client.Commands
 
 		public override int Run (string[] remainingArguments)
 		{
-			if (Start && Stop)
-				throw new InvalidOperationException ("Both start and stop cannot be set.");
-			if (!Start && !Stop)
-				throw new InvalidOperationException ("Either start or stop must be set.");
+			if (Start == Stop)
+			{
+				if (Start && Stop)
+					Console.WriteLine ("Error: Both start and stop cannot be set.");
+				else
+					Console.WriteLine ("Error: Either start or stop must be set.");
+				return 1;
+			}
 
 			if (Start)
 				SpawnServiceDaemon ();
 
 			if (Stop)
-				Client.Delete (new AdminKillRequest ());
+			{
+				try
+				{
+					Client.Delete (new AdminKillRequest ());
+				}
+				catch(WebException e)
+				{
+					if (e.Status == WebExceptionStatus.ConnectFailure)
+						Console.WriteLine ("Error: ConnectFailure. This usually occurs when there is nothing to stop.");
+					else
+						Console.WriteLine ("Error: {0}", e.Status);
+					return 1;
+				}
+			}
 
 			return 0;
 		}
