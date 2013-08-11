@@ -9,7 +9,7 @@ namespace BTDeploy.ServiceDaemon.TorrentClients
 		ITorrentDetails[] List();
 		string Add(Stream torrentFile, string outputDirectoryPath);
 		void Remove(string Id, bool deleteFiles = false);
-		Stream Create(string name, string filesSource, IEnumerable<string> Trackers = null);
+		Stream Create(string name, string sourceDirectoryPath, IEnumerable<string> Trackers = null);
 	}
 
 	public interface ITorrentDetails
@@ -32,5 +32,30 @@ namespace BTDeploy.ServiceDaemon.TorrentClients
 		Seeding,
 		Stopped,
 		Error
+	}
+
+	public class TorrentAlreadyAddedException : ITorrentClientException
+	{
+		public TorrentAlreadyAddedException(string message = "", Exception innerException = null) : base (message, innerException) { }
+	}
+
+	public class InvalidOutputDirectoryException : ITorrentClientException
+	{
+		public InvalidOutputDirectoryException(string message = "", Exception innerException = null) : base (message, innerException) { }
+	}
+
+	public class OutputDirectoryAlreadyInUseException : ITorrentClientException
+	{
+		public OutputDirectoryAlreadyInUseException(string message = "", Exception innerException = null) : base (message, innerException) { }
+	}
+
+	public class InvalidSourceDirectoryException : ITorrentClientException
+	{
+		public InvalidSourceDirectoryException(string message = "", Exception innerException = null) : base (message, innerException) { }
+	}
+
+	public abstract class ITorrentClientException : Exception
+	{
+		public ITorrentClientException(string message = "", Exception innerException = null) : base (message, innerException) { }
 	}
 }

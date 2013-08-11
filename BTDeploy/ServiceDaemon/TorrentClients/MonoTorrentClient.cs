@@ -137,6 +137,18 @@ namespace BTDeploy.ServiceDaemon.TorrentClients
 			// Load the torrent.
 			var torrent = Torrent.Load(torrentFile);
 
+			// Check if torrent already added.
+			if(Engine.Torrents.Any(t => t.InfoHash.ToString() == torrent.InfoHash.ToString()))
+			   throw new TorrentAlreadyAddedException();
+
+			// Check if outputDirectoryPath is not a file.
+			if (File.Exists (outputDirectoryPath))
+				throw new InvalidOutputDirectoryException ("Already exists as a file. Can either not exist or must be a directory.");
+
+			// Check if output directory already in use.
+			if (Engine.Torrents.Any (t => t.SavePath.StartsWith (outputDirectoryPath, StringComparison.CurrentCultureIgnoreCase)))
+				throw new OutputDirectoryAlreadyInUseException ();
+
 			// Save torrent file.
 			torrentFile.Position = 0;
 			var applicationDataTorrentFilePath = Path.Combine (TorrentFileDirectory, torrent.InfoHash.ToString() + ".torrent");
@@ -149,7 +161,6 @@ namespace BTDeploy.ServiceDaemon.TorrentClients
 			// Create output directory.
 			if (!Directory.Exists (outputDirectoryPath))
 				Directory.CreateDirectory (outputDirectoryPath);
-
 
 			// Finally add.
 			return Add (torrent, outputDirectoryPath);
@@ -203,10 +214,14 @@ namespace BTDeploy.ServiceDaemon.TorrentClients
 				Directory.Delete(torrentManager.SavePath, true);
 		}
 
-		public Stream Create (string name, string filesSource, IEnumerable<string> trackers = null)
+		public Stream Create (string name, string sourceDirectoryPath, IEnumerable<string> trackers = null)
 		{
+			// Check sourceDirectoryPath is a directory.
+			if (!Directory.Exists (sourceDirectoryPath))
+				throw new InvalidSourceDirectoryException ("Was not found or is not a directory.");
+
 			// Create torrent file mappings.
-			var fileMappings = new TorrentFileSource (filesSource, true).Files.Select (fm =>
+			var fileMappings = new TorrentFileSource (sourceDirectoryPath, true).Files.Select (fm =>
 			{
 				var info = new FileInfo (fm.Source);
 				return new TorrentFile (fm.Destination, info.Length, fm.Source);

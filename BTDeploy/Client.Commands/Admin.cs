@@ -44,20 +44,7 @@ namespace BTDeploy.Client.Commands
 				SpawnServiceDaemon ();
 
 			if (Stop)
-			{
-				try
-				{
-					Client.Delete (new AdminKillRequest ());
-				}
-				catch(WebException e)
-				{
-					if (e.Status == WebExceptionStatus.ConnectFailure)
-						Console.WriteLine ("Error: ConnectFailure. This usually occurs when there is nothing to stop.");
-					else
-						Console.WriteLine ("Error: {0}", e.Status);
-					return 1;
-				}
-			}
+				Client.Delete (new AdminKillRequest ());
 
 			return 0;
 		}
