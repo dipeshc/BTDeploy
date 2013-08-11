@@ -33,11 +33,7 @@ namespace BTDeploy.Client.Commands
 					Id = torrentDetails.Id,
 					DeleteFiles = Delete
 				});
-				allTorrentDetails = allTorrentDetails.Where(d => d != torrentDetails).ToArray();
 			});
-
-			if (allTorrentDetails.Count () == 0) 
-				Kill = true;
 
 			return 0;
 		}

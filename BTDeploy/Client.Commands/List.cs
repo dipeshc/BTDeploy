@@ -70,9 +70,6 @@ namespace BTDeploy.Client.Commands
 				table.AddRow(row.ToArray());
 			});
 
-			if (allTorrentDetails.Count () == 0)
-				Kill = true;
-
 			Console.Write (table);
 
 			return 0;
