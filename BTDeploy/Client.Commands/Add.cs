@@ -30,7 +30,7 @@ namespace BTDeploy.Client.Commands
 			var OutputDirectoryPathFull = Path.GetFullPath (OuputDirectoryPath);
 			var postUri = "/api/torrents?OutputDirectoryPath=" + OutputDirectoryPathFull + "&mirror=" + Mirror.ToString();
 
-			var addedTorrentDetails = Client.PostFile<ITorrentDetails> (postUri, new FileInfo(TorrentPath), MimeTypes.GetMimeType (TorrentPath));
+			var addedTorrentDetails = Client.PostFile<TorrentDetails> (postUri, new FileInfo(TorrentPath), MimeTypes.GetMimeType (TorrentPath));
 
 			if (!Wait)
 				return 0;
